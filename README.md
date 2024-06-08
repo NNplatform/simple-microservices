@@ -1,18 +1,21 @@
-# simple-microservices
+# simple-microservices Structure
 
 ```
-project-root/
+simple-microservices/
 ├── application/
 │   ├── Dockerfile
 │   ├── app_code/
-├── consent/
+├── consents/
 │   ├── Dockerfile
 │   ├── consent_code/
-├── account/
+├── accounts/
 │   ├── Dockerfile
 │   ├── account_code/
-├── prometheus/
-│   ├── prometheus.yml
+├── nginx/
+│   ├── Dockerfile
+│   ├── nginx_config/
+├── postgres/
+│   ├── Dockerfile
 ├── docker-compose.yml
 ```
 
