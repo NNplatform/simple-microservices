@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"  # Expose Nginx on port 8000
+    depends_on:
+      - application
+      - accounts
+      - consents
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - app-network
+
+  application:
+    image: devfunapp:1.0
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    ports:
+      - "8001:5000"
+    networks:
+      - app-network
+
+  accounts:
+    image: accounts:1.0
+    depends_on:
+      - application
+    build:
+      context: ./accounts
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    ports:
+      - "8002:5000"
+    networks:
+      - app-network
+
+  consents:
+    image: consents:1.0
+    build:
+      context: ./consents
+      dockerfile: Dockerfile
+    depends_on:
+      - application
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    ports:
+      - "8003:5000"
+    networks:
+      - app-network
+
+  db:
+    image: devfun-postgres
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+networks:
+  app-network:
