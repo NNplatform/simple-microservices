@@ -1,14 +1,14 @@
 FROM python:3.9-slim
 
-WORKDIR /accounts
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN pip install elasticsearch && pip install flask-cors
+
+WORKDIR /app
 
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
 
 EXPOSE 5000  
 

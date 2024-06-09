@@ -19,10 +19,15 @@ services:
 
   application:
     image: devfunapp:1.0
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     build:
       context: ./app
       dockerfile: Dockerfile
     environment:
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
       - DATABASE_URL=${DATABASE_URL}
     ports:
       - "8001:5000"
@@ -37,6 +42,8 @@ services:
       context: ./accounts
       dockerfile: Dockerfile
     environment:
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
       - DATABASE_URL=${DATABASE_URL}
     ports:
       - "8002:5000"
@@ -51,6 +58,8 @@ services:
     depends_on:
       - application
     environment:
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
       - DATABASE_URL=${DATABASE_URL}
     ports:
       - "8003:5000"
@@ -70,6 +79,30 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - app-network
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+      - TZ=Asia/Bangkok
+    ports:
+      - "9200:9200"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    ports:
+      - "5601:5601"
+    networks:
+      - app-network
+    depends_on:
+      - elasticsearch
 
 volumes:
   db_data:
