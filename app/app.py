@@ -8,9 +8,16 @@ import time
 app = Flask(__name__)
 CORS(app)
 
+# Configure retries for Elasticsearch
+retry_config = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+
 # Initialize Elasticsearch client
-retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-es = Elasticsearch(['http://elasticsearch:9200'], retry_on_timeout=True, max_retries=retries)
+es = Elasticsearch(
+    ['http://elasticsearch:9200'],
+    retry_on_timeout=True,
+    max_retries=retry_config.total
+)
+
 
 # Check if index exists, if not, create it
 def create_index_with_retry(es, index_name, max_retries=5):
